@@ -1,4 +1,4 @@
-package com.app.jlisp;
+package src.main.java.jlisp;
 
 import java.io.IOException;
 import java.util.Scanner;
