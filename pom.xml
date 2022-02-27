@@ -11,7 +11,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <exec.mainClass>src.main.java.jlisp.Jlisp</exec.mainClass>
+        <exec.mainClass>jlisp.Jlisp</exec.mainClass>
     </properties>
 
     <build>
@@ -30,7 +30,7 @@
                             <transformers>
                                 <transformer
                                     implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>src.main.java.jlisp.Jlisp</mainClass>
+                                    <mainClass>jlisp.Jlisp</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

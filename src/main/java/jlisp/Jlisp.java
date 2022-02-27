@@ -1,7 +1,7 @@
-package src.main.java.jlisp;
+package jlisp;
 
 import java.io.IOException;
-import java.util.Scanner;
+import java.util.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -24,6 +24,11 @@ public class Jlisp{
         run(new String(bytes, Charset.defaultCharset()));
     }
 
+    public static void error(String message, int line){
+        System.out.println("Error on line " + line  + ":" + message);
+        System.exit(65);
+    }
+
 
     private static void runREPL(){
         Scanner reader = new Scanner(System.in);
@@ -34,10 +39,22 @@ public class Jlisp{
             if(line==null) break;
             run(line);
         }
+
+        reader.close();
     }
 
 
     private static void run(String source){
-        System.out.println("Running" + source);
+        //The path: Source String -> Scanner -> List of tokens -> Parser -> AST -> Interpreter -> output 
+        LispScanner scanner = new LispScanner(source);
+        List<Token> tokens = scanner.scanTokens();
+
+        // Parser parser = new Parser();
+        // Expr tree = parser.parse(tokens);
+
+        // Interpreter interpreter = new Interpreter();
+        // interpreter.interpret(tree);
+
+
     }
 }
