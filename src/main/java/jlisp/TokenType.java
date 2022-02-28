@@ -11,8 +11,6 @@ enum TokenType {
     //keywords
     IF, WHILE, SET, BEGIN, CONS, CAR, CDR, NUMBER_QUEST, SYSMBOL_QUEST, LIST_QUEST, NULL_QUEST, PRINT, T, DEFINE,
 
-    NULL,
-
 
     EOF
 }

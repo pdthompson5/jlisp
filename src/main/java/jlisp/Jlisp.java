@@ -43,11 +43,17 @@ public class Jlisp{
         reader.close();
     }
 
+    
+
 
     private static void run(String source){
         //The path: Source String -> Scanner -> List of tokens -> Parser -> AST -> Interpreter -> output 
         LispScanner scanner = new LispScanner(source);
         List<Token> tokens = scanner.scanTokens();
+
+        for(Token token : tokens){
+            System.out.println(token);
+        }
 
         // Parser parser = new Parser();
         // Expr tree = parser.parse(tokens);

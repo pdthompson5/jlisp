@@ -25,6 +25,7 @@ public class LispScanner {
     for(String tokenString : splitStrings){
       scanToken(tokenString);
     }
+    addToken(EOF);
     return tokens;
   }
 
@@ -53,14 +54,14 @@ public class LispScanner {
 
   ArrayList<String> splitBySpace(){
     String sourceWithSpaces = source.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ");
-    return  new ArrayList<String>(Arrays.asList(sourceWithSpaces.split(" ")));
+    return new ArrayList<String>(Arrays.asList(sourceWithSpaces.split(" ")));
   }
 
   void scanToken(String tokenString){
     switch (tokenString) {
+      case "": break;
       case "(": addToken(LEFT_PAREN); break;
       case ")": addToken(RIGHT_PAREN); break;
-      case "()": addToken(NULL); break;
       case "-": addToken(MINUS); break;   
       case "+": addToken(PLUS); break;   
       case "*": addToken(STAR); break;   
@@ -68,6 +69,7 @@ public class LispScanner {
       case "=": addToken(EQUAL); break;   
       case ">": addToken(GREATER_THAN); break;   
       case "<": addToken(LESS_THAN); break;
+      case "\n": line++; break;
     
       default:
       if(isDigit(tokenString.charAt(0))){
