@@ -69,6 +69,7 @@ public class LispScanner {
       case "=": addToken(EQUAL); break;   
       case ">": addToken(GREATER_THAN); break;   
       case "<": addToken(LESS_THAN); break;
+      case "t": addToken(T, null, true); break;
       case "\n": line++; break;
     
       default:
@@ -102,11 +103,11 @@ public class LispScanner {
 
   //TODO: Figure out what valid identifiers are in LISP
   private boolean validIdentifier(String token){
-    // for(char c : token.toCharArray()){
-    //   if(!isAlphaNumeric(c)){
-    //     return false;
-    //   }
-    // }
+    for(char c : token.toCharArray()){
+      if(!isAlphaNumeric(c)){
+        return false;
+      }
+    }
     return true;
   }
 

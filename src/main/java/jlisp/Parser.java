@@ -97,9 +97,9 @@ public class Parser {
         return procedure();
     }
 
-    //How do I tell if it is a procedure, variable or literal 
-    //procedures can only occur at the start of an sexpression
+
     private Expr procedure(){
+        //Procedures can only occur at the beginning of an s expression
         if(previous().type == LEFT_PAREN){
             Token name = advance();
 
@@ -118,10 +118,10 @@ public class Parser {
         return variable();
     }
 
-    //TODO: Tell the difference between a variable and a literal 
-    //Maybe if you can't find the varible in the anv, return the literal version
-    //Right now everything is a variable
+    
+    
     private Expr variable(){
+        //Variables will always be identifiers
         if(peek().type == IDENTIFIER){
             Token name = advance();
             return new Expr.Variable(name);
@@ -129,6 +129,7 @@ public class Parser {
         return literal();
     }
 
+    //Only supported literals are number and t
     private Expr literal(){
         Token lit = advance();
         return new Expr.Literal(lit.literal);
