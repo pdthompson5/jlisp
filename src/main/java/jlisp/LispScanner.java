@@ -100,12 +100,13 @@ public class LispScanner {
     addToken(IDENTIFIER, token, null);
   }
 
+  //TODO: Figure out what valid identifiers are in LISP
   private boolean validIdentifier(String token){
-    for(char c : token.toCharArray()){
-      if(!isAlphaNumeric(c)){
-        return false;
-      }
-    }
+    // for(char c : token.toCharArray()){
+    //   if(!isAlphaNumeric(c)){
+    //     return false;
+    //   }
+    // }
     return true;
   }
 

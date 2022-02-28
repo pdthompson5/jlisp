@@ -13,7 +13,8 @@ abstract class Expr {
         R visitVariableExpr(Variable expr);
         R visitLiteralExpr(Literal expr);
         R visitConditionalExpr(Conditional expr);
-        R visitDefinitionExpr(Definition expr);
+        R visitFunctionDefinitionExpr(FunctionDefinition expr);
+        R visitVariableDefinitionExpr(VariableDefinition expr);
         R visitProcedureExpr(Procedure expr);
         R visitWhileExpr(While expr);
       }
@@ -57,20 +58,35 @@ abstract class Expr {
         }
     }
 
-    static class Definition extends Expr{
+    static class FunctionDefinition extends Expr{
+      final Token name;
+      final List<Token> parameters;
+      final Expr body;
+      FunctionDefinition(Token name, List<Token> parameters, Expr body){   
+          this.name = name;
+          this.parameters = parameters;
+          this.body = body;
+      }
+
+      @Override
+      <R> R accept(Visitor<R> visitor) {
+        return visitor.visitFunctionDefinitionExpr(this);
+      }
+    }
+    
+
+    static class VariableDefinition extends Expr{
         final Token name;
         final Expr value;
-        Definition(Token name, Expr value){   
+        VariableDefinition(Token name, Expr value){   
             this.name = name;
             this.value = value;
         }
 
         @Override
         <R> R accept(Visitor<R> visitor) {
-          return visitor.visitDefinitionExpr(this);
+          return visitor.visitVariableDefinitionExpr(this);
         }
-
-
     }
 
     static class Procedure extends Expr{
@@ -88,10 +104,10 @@ abstract class Expr {
     }
 
     static class While extends Expr{
-        Expr test;
+        Expr condition;
         Expr body;
-        While(Expr test, Expr body){
-            this.test = test;
+        While(Expr condition, Expr body){
+            this.condition = condition;
             this.body = body;
         }
         @Override
