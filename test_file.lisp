@@ -1,3 +1,8 @@
-(+ 4 2)
-(- 4 2)
-(this number 2)
+(+ 1 2)  
+(let a 2) 
+(while t (let a (+ a 1))) 
+(if (> a 2) (print a) (print -1)) 
+(define func (a b) (+ a b))
+
+
+

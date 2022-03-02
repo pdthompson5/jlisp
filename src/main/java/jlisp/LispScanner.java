@@ -58,19 +58,30 @@ public class LispScanner {
   }
 
   void scanToken(String tokenString){
+    //Split up white space characters
+    //TODO: Find a better solution to this issue
+    if(tokenString.isBlank() && tokenString.length() > 1){
+      for(char c : tokenString.toCharArray()){
+        scanToken(Character.toString(c));
+      }
+      return;
+    }
+
     switch (tokenString) {
       case "": break;
       case "(": addToken(LEFT_PAREN); break;
       case ")": addToken(RIGHT_PAREN); break;
-      case "-": addToken(MINUS); break;   
-      case "+": addToken(PLUS); break;   
-      case "*": addToken(STAR); break;   
-      case "/": addToken(SLASH); break;   
-      case "=": addToken(EQUAL); break;   
-      case ">": addToken(GREATER_THAN); break;   
-      case "<": addToken(LESS_THAN); break;
+      // case "-": addToken(MINUS); break;   
+      // case "+": addToken(PLUS); break;   
+      // case "*": addToken(STAR); break;   
+      // case "/": addToken(SLASH); break;   
+      // case "=": addToken(EQUAL); break;   
+      // case ">": addToken(GREATER_THAN); break;   
+      // case "<": addToken(LESS_THAN); break;
       case "t": addToken(T, null, true); break;
       case "\n": line++; break;
+      case "\t": break;
+      case "\r": break;
     
       default:
       if(isDigit(tokenString.charAt(0))){
@@ -89,6 +100,7 @@ public class LispScanner {
     TokenType type = keywords.get(token);
     if (type == null){
       //Add identifier if no keyword match
+      System.out.println(token.isBlank());
       identifier(token);
     } else{
       addToken(type);
@@ -102,12 +114,9 @@ public class LispScanner {
   }
 
   //TODO: Figure out what valid identifiers are in LISP
+  //for now just return true
   private boolean validIdentifier(String token){
-    for(char c : token.toCharArray()){
-      if(!isAlphaNumeric(c)){
-        return false;
-      }
-    }
+    if(keywords.containsKey(token)) return false;
     return true;
   }
 

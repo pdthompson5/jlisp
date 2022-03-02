@@ -55,8 +55,14 @@ public class Jlisp{
             System.out.println(token);
         }
 
-        // Parser parser = new Parser();
-        // Expr tree = parser.parse(tokens);
+        Parser parser = new Parser(tokens);
+        List<Expr> tree = parser.parse();
+
+
+        AstPrinter printer = new AstPrinter();
+        for(Expr expr: tree){
+            System.out.println(printer.print(expr));
+        }
 
         // Interpreter interpreter = new Interpreter();
         // interpreter.interpret(tree);

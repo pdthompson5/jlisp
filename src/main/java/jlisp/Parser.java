@@ -6,6 +6,9 @@ package jlisp;
 
 import java.util.ArrayList;
 import java.util.List;
+//TODO: Set will only create a global variable , colinked recursion possibly supported
+
+//TODO: Fix issue with expect )
 
 import static jlisp.TokenType.*;
 
@@ -13,6 +16,7 @@ public class Parser {
 
     private final List<Token> tokens;
     private int current = 0;
+    private boolean noMatch = false;
 
 
     Parser(List<Token> tokens){
@@ -28,31 +32,39 @@ public class Parser {
         return expressions;
     }
 
-    //I think that the order here doesn't acuatlly matter since evaluation always happens on the low end. Thank you for the parenthesis
-
     private Expr expression(){
-        if(match(LEFT_PAREN)){
+        if(peek().type == LEFT_PAREN){
             return sExpression();
         }
-        else{
-            //TODO: Implement the funky non sexpression allowable top level expressions 
-            return null;
-        }
+        return variable();
     }
 
 
 
     private Expr sExpression(){
-        Expr cond = functionDefinition();
-        consume(RIGHT_PAREN, "Expect ')'");
-        return cond;
+        if(match(LEFT_PAREN)){
+            Expr cond = functionDefinition();
+
+            //If no other matches it must be an S expression or not an expression
+            if(cond == null && peek().type == LEFT_PAREN && noMatch){
+                cond = sExpression();
+            }
+            else if(noMatch){
+                Jlisp.error("Expect expression", peek().line);
+            }
+
+            consume(RIGHT_PAREN, "Expect ')'");
+            return cond;
+        }
+
+        return functionDefinition();
     }
 
     //Where can people define variables and such? anywhere? I think so
     private Expr functionDefinition(){
+        
         if(match(DEFINE)){
             Token name = advance();
-
             //Read in parameter list 
             List<Token> parameters = new ArrayList<>(); 
             while(peek().type != RIGHT_PAREN){
@@ -122,8 +134,8 @@ public class Parser {
     
     private Expr variable(){
         //Variables will always be identifiers
-        if(peek().type == IDENTIFIER){
-            Token name = advance();
+        if(match(IDENTIFIER)){
+            Token name = previous();
             return new Expr.Variable(name);
         }
         return literal();
@@ -131,8 +143,12 @@ public class Parser {
 
     //Only supported literals are number and t
     private Expr literal(){
-        Token lit = advance();
-        return new Expr.Literal(lit.literal);
+        if(match(NUMBER, T)){
+            Token lit = previous();
+            return new Expr.Literal(lit.literal);
+        }
+        noMatch = true;
+        return null;
     }   
 
     private boolean match(TokenType... types) {

@@ -3,14 +3,14 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.springframework</groupId>
+    <groupId>src.main.java.jlisp</groupId>
     <artifactId>jlisp</artifactId>
     <packaging>jar</packaging>
     <version>0.1.0</version>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <exec.mainClass>jlisp.Jlisp</exec.mainClass>
     </properties>
 
