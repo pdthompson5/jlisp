@@ -52,6 +52,7 @@ public class Parser {
             else if(noMatch){
                 Jlisp.error("Expect expression", peek().line);
             }
+            
 
             consume(RIGHT_PAREN, "Expect ')'");
             return cond;
@@ -113,12 +114,12 @@ public class Parser {
     private Expr procedure(){
         //Procedures can only occur at the beginning of an s expression
         if(previous().type == LEFT_PAREN){
-            Token name = advance();
-
             //TODO: Figure out what to do with Null
-            if(name.type == RIGHT_PAREN){
-                return null;
+            if(peek().type == RIGHT_PAREN){
+                return new Expr.Literal(null);
             }
+
+            Token name = advance();
 
             List<Expr> arguments = new ArrayList<>();
             while(peek().type != RIGHT_PAREN){

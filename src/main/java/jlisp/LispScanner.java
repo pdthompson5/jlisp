@@ -85,7 +85,7 @@ public class LispScanner {
     
       default:
       if(isDigit(tokenString.charAt(0))){
-        addToken(NUMBER, tokenString, Double.parseDouble(tokenString));
+        addToken(NUMBER, tokenString, Double.parseDouble(tokenString.trim()));
       }
       else{
         keyword(tokenString);
@@ -100,7 +100,6 @@ public class LispScanner {
     TokenType type = keywords.get(token);
     if (type == null){
       //Add identifier if no keyword match
-      System.out.println(token.isBlank());
       identifier(token);
     } else{
       addToken(type);
@@ -110,7 +109,7 @@ public class LispScanner {
 
   private void identifier(String token){
     if(!validIdentifier(token)) Jlisp.error("Invalid Identifier: \"" + token + "\"", line);
-    addToken(IDENTIFIER, token, null);
+    addToken(IDENTIFIER, token.trim(), null);
   }
 
   //TODO: Figure out what valid identifiers are in LISP
