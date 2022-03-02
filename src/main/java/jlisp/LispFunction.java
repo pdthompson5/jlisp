@@ -2,7 +2,7 @@ package jlisp;
 
 import java.util.List;
 
-public class LispFunction {
+public class LispFunction implements LispCallable {
     private final Expr.FunctionDefinition definition;
     private final Environment global;
 
@@ -11,17 +11,23 @@ public class LispFunction {
         this.global = global;
     }
 
-    // public Object call(Interpreter interpreter, List<Object> arguments){
-    //     //Add params to new env 
-    //     Environment environment = new Environment(global);
-    //     for (int i = 0; i < definition.parameters.size(); i++){
-    //         environment.define(definition.parameters.get(i).lexeme, arguments.get(i));
-    //     }
+    @Override
+    public Object call(Interpreter interpreter, List<Object> arguments){
+        //Add params to new env 
+        Environment environment = new Environment(global);
+        for (int i = 0; i < definition.parameters.size(); i++){
+            environment.defineVar(definition.parameters.get(i).lexeme, arguments.get(i));
+        }
 
-    //     //Return execution 
-    //     return Interpreter.evaluateBody(this.definition.body, global);
-    // }
+        //Return execution 
+        //TODO: implement evaluate body
+        return null;
+        // return Interpreter.evaluateBody(this.definition.body, global);
+    }
 
+    
+
+    @Override
     public int arity(){
         return definition.parameters.size();
     }

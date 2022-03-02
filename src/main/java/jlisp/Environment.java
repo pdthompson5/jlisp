@@ -8,13 +8,13 @@ import java.util.HashMap;
 //Standard env 
 
     //Begin -> empty function with endless params -> Expr... arguments;
-
+ 
 public class Environment {
     final Environment enclosing;
 
     //This interpretation has different namespaces for Variables and Functions so it is a Lisp-2
     private Map<String, Object> varEnv = new HashMap<>();
-    private Map<String, LispFunction> funcEnv = new HashMap<>();
+    private Map<String, LispCallable> funcEnv = new HashMap<>();
     
 
     Environment(){
@@ -29,7 +29,7 @@ public class Environment {
         varEnv.put(name, value);
     }
 
-    void defineFunc(String name, LispFunction func){
+    void defineFunc(String name, LispCallable func){
         funcEnv.put(name, func);
     }
 
@@ -46,7 +46,7 @@ public class Environment {
         return null; //unreachable
     }
 
-    LispFunction getFunc(Token name){
+    LispCallable getFunc(Token name){
         //Look-up in current env 
         if(funcEnv.containsKey(name.lexeme)) {
             return funcEnv.get(name.lexeme);

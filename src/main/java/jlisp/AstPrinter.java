@@ -38,8 +38,6 @@ public class AstPrinter implements Expr.Visitor<String>{
         return expr.value.toString();
       }
     
-      //This only displays the first argument
-      //TODO: Fix these so they will print with any number of arguments
       @Override
       public String visitProcedureExpr(Expr.Procedure expr) {
         return parenthesize(expr.name.lexeme, expr.arguments);
