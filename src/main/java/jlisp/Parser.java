@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 //TODO: Set will only create a global variable , colinked recursion possibly supported
 
-//TODO: Fix issue with expect )
 
 import static jlisp.TokenType.*;
 
@@ -67,6 +66,7 @@ public class Parser {
         if(match(DEFINE)){
             Token name = advance();
             //Read in parameter list 
+            consume(LEFT_PAREN, "Expect '(' after function name");
             List<Token> parameters = new ArrayList<>(); 
             while(peek().type != RIGHT_PAREN){
                 parameters.add(advance());

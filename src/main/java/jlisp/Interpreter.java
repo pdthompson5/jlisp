@@ -6,10 +6,16 @@ import java.util.ArrayList;
 
 //While loops, conditionals and functions do not eval all of their sub expressions
 public class Interpreter implements Expr.Visitor<Object>{
-    final Environment globals = new Environment();
+    Environment globals = new Environment();
 
-    Object evaluate (Expr expr) {
-        return expr.accept(this);
+    Object evaluate(Expr expr) {
+        try{
+            return expr.accept(this);
+        }
+        catch(RuntimeError error){
+            Jlisp.error(error.getMessage(), error.token.line);
+        }
+        return null; //unreachable
     }
 
     @Override
@@ -47,8 +53,19 @@ public class Interpreter implements Expr.Visitor<Object>{
         //Fetch the function
         LispCallable func = globals.getFunc(expr.name);
 
+        //Test the arity if the function has limited parameters 
+        if (expr.arguments.size() != func.arity() && func.arity() > -1) {
+            throw new RuntimeError(expr.name, "Expected " +
+                func.arity() + " arguments for function: " + expr.name.lexeme + " but got " +
+                expr.arguments.size() + ".");
+          }
+
         //Return the result of the function
-        return func.call(this, values, expr.name.line);
+        try{
+            return func.call(this, values, expr.name.line);
+        } catch (ClassCastException error){
+            throw new RuntimeError(expr.name, "Invalid argument type for function " + expr.name.lexeme);
+        }
     }
     
     @Override
@@ -74,10 +91,6 @@ public class Interpreter implements Expr.Visitor<Object>{
         return val;
     }
 
-    public void checkNumberOperand(Token operator, Object operand, int line){
-        if (operand instanceof Double) return;
-        Jlisp.error("Expect number for operator: " + operator, line);
-    }
 
     private boolean isTruthy(Object val){
         if(val == null){
@@ -90,6 +103,64 @@ public class Interpreter implements Expr.Visitor<Object>{
         //TODO: Implement Runtime errors to fix this
         Jlisp.error("Unexpected conditional value. Conditional values : () or t", -10);
         return false; //unreachable
+    }
+
+    public static String stringify(Object object) {
+        String convert = "";
+
+        //Our null is nil   
+        if (object == null) convert = "()";
+        
+        if (object instanceof Boolean){
+            convert = "t";
+        }
+
+        //We don't want to print excessive .0s
+        if (object instanceof Double) {
+            convert = stringifyDouble((Double)object);
+        }
+
+        if (object instanceof List){
+            convert = stringifyList((List<Object>)object);
+        }
+
+        if(convert.equals("")){
+            convert = object.toString();
+        }
+
+        return convert;
+    }
+
+    private static String stringifyDouble(Double dbl){
+        String text = dbl.toString();
+        if (text.endsWith(".0")) {
+            text = text.substring(0, text.length() - 2);
+        }
+        return text;
+    }
+
+    private static String stringifyList(List<Object> l){
+        String convert = "";
+        convert += "(";
+        for(int i = 0; i < l.size(); i++){
+            if(!(i==0)) convert+=" ";
+            convert += stringify(l.get(i));
+        }
+        convert += ")";
+        return convert;
+    }
+
+    public Object evaluateBody(Expr body, Environment env){
+        //Swap out env for the length of the function execution
+        Environment old = globals;
+        globals = env;
+
+        //Eval function body 
+        Object val = evaluate(body);
+
+        //revert env
+        globals = old;
+        return val;
     }
     
 }

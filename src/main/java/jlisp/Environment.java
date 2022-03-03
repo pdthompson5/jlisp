@@ -6,13 +6,14 @@ import java.util.Map;
 
 import java.util.HashMap;
 import java.util.List;
+import java.lang.*;
 
 
 
     //Begin -> empty function with endless params -> Expr... arguments;
  
 public class Environment {
-        //Standard env 
+    //Standard env 
     private final static Map<String, LispCallable> standardEnv = new HashMap<>();
 
     static {
@@ -21,13 +22,109 @@ public class Environment {
             public int arity() {
                 return 2;
             }
-            //TODO: Figure out how to do casting errors
-            //I think I can do it with adding required types to LispCallable
+
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
                 return (Double)arguments.get(0) + (Double)arguments.get(1);
             }
         });
+
+        standardEnv.put("-", new LispCallable() {
+            @Override
+            public int arity() {
+                return 2;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                return (Double)arguments.get(0) - (Double)arguments.get(1);
+            }
+        });
+
+        standardEnv.put("/", new LispCallable() {
+            @Override
+            public int arity() {
+                return 2;
+            }
+
+            //TODO: Do I need int line here?
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                if((Double) arguments.get(1) == 0){
+                    
+                    Jlisp.error("Divided by zero error", line);
+                }
+                return (Double)arguments.get(0) / (Double)arguments.get(1);
+            }
+
+
+        });
+        standardEnv.put("*", new LispCallable() {
+            @Override
+            public int arity() {
+                return 2;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                return (Double)arguments.get(0) * (Double)arguments.get(1);
+            }
+
+
+        });
+        standardEnv.put(">", new LispCallable() {
+            @Override
+            public int arity() {
+                return 2; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                if((Double)arguments.get(0) > (Double)arguments.get(1)){
+                    return true;
+                } else{
+                    return null;
+                }
+            }
+        });
+        standardEnv.put("<", new LispCallable() {
+            @Override
+            public int arity() {
+                return 2; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                if((Double)arguments.get(0) < (Double)arguments.get(1)){
+                    return true;
+                } else{
+                    return null;
+                }
+            }
+        });
+        standardEnv.put("=", new LispCallable() {
+            @Override
+            public int arity() {
+                return -1; //unlimited parameters
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                return arguments;
+            }
+        });
+        standardEnv.put("list", new LispCallable() {
+            @Override
+            public int arity() {
+                return -1; //unlimited parameters
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                return arguments;
+            }
+        });
+
     }
     final Environment enclosing;
 
@@ -53,6 +150,10 @@ public class Environment {
 
     void defineFunc(String name, LispCallable func){
         funcEnv.put(name, func);
+    }
+
+    void printEnv(){
+        System.out.println(varEnv.toString());
     }
 
     Object getVar(Token name){

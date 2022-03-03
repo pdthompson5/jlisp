@@ -30,6 +30,7 @@ public class Jlisp{
     }
 
 
+
     private static void runREPL(){
         Scanner reader = new Scanner(System.in);
 
@@ -51,22 +52,22 @@ public class Jlisp{
         LispScanner scanner = new LispScanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        for(Token token : tokens){
-            System.out.println(token);
-        }
+        // for(Token token : tokens){
+        //     System.out.println(token);
+        // }
 
         Parser parser = new Parser(tokens);
         List<Expr> tree = parser.parse();
 
 
-        AstPrinter printer = new AstPrinter();
-        for(Expr expr: tree){
-            System.out.println(printer.print(expr));
+        // AstPrinter printer = new AstPrinter();
+        // for(Expr expr: tree){
+        //     System.out.println(printer.print(expr));
+        // }
+
+        Interpreter interpreter = new Interpreter();
+        for(Expr expr : tree){
+            System.out.println(Interpreter.stringify(interpreter.evaluate(expr)));
         }
-
-        // Interpreter interpreter = new Interpreter();
-        // interpreter.interpret(tree);
-
-
     }
 }

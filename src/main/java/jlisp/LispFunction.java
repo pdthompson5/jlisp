@@ -18,11 +18,7 @@ public class LispFunction implements LispCallable {
         for (int i = 0; i < definition.parameters.size(); i++){
             environment.defineVar(definition.parameters.get(i).lexeme, arguments.get(i));
         }
-
-        //Return execution 
-        //TODO: implement evaluate body
-        return null;
-        // return Interpreter.evaluateBody(this.definition.body, global);
+        return interpreter.evaluateBody(this.definition.body, environment);
     }
 
     
