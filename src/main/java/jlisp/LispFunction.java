@@ -12,7 +12,7 @@ public class LispFunction implements LispCallable {
     }
 
     @Override
-    public Object call(Interpreter interpreter, List<Object> arguments){
+    public Object call(Interpreter interpreter, List<Object> arguments, int line){
         //Add params to new env 
         Environment environment = new Environment(global);
         for (int i = 0; i < definition.parameters.size(); i++){

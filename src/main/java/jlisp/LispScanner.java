@@ -123,16 +123,6 @@ public class LispScanner {
     return c >= '0' && c <= '9';
   }
 
-  private boolean isAlpha(char c) {
-    return (c >= 'a' && c <= 'z') ||
-           (c >= 'A' && c <= 'Z') ||
-            c == '_';
-  }
-
-  private boolean isAlphaNumeric(char c) {
-    return isAlpha(c) || isDigit(c);
-  }
-
   //Add token if literal is null
   private void addToken(TokenType type) {
       addToken(type, "", null);
