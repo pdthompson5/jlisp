@@ -22,7 +22,7 @@ public class Interpreter implements Expr.Visitor<Object>{
     public Object visitConditionalExpr(Expr.Conditional expr) {
         Object condition = evaluate(expr.condition);
 
-        if(isTruthy(condition)){
+        if(isTruthy(condition, expr.keyword)){
             return evaluate(expr.ifTrue);
         }
         else{
@@ -65,7 +65,7 @@ public class Interpreter implements Expr.Visitor<Object>{
             return func.call(this, values, expr.name.line);
         } catch (ClassCastException error){
             throw new RuntimeError(expr.name, "Invalid argument type for function " + expr.name.lexeme);
-        }
+        } 
     }
     
     @Override
@@ -83,7 +83,7 @@ public class Interpreter implements Expr.Visitor<Object>{
     public Object visitWhileExpr(Expr.While expr){
         Object condition = evaluate(expr.condition);
         Object val = null;
-        while(isTruthy(condition)){
+        while(isTruthy(condition, expr.keyword)){
             val = evaluate(expr.body);
             condition = evaluate(expr.condition);
         }
@@ -92,7 +92,7 @@ public class Interpreter implements Expr.Visitor<Object>{
     }
 
 
-    private boolean isTruthy(Object val){
+    private boolean isTruthy(Object val, Token t){
         if(val == null){
             return false;
         }
@@ -100,9 +100,7 @@ public class Interpreter implements Expr.Visitor<Object>{
             return (Boolean)val;
         }
 
-        //TODO: Implement Runtime errors to fix this
-        Jlisp.error("Unexpected conditional value. Conditional values : () or t", -10);
-        return false; //unreachable
+        throw new RuntimeError(t, "Invalid conditional" + stringify(val) + ". Valid conditionals: t, ()");
     }
 
     public static String stringify(Object object) {
@@ -149,6 +147,7 @@ public class Interpreter implements Expr.Visitor<Object>{
         convert += ")";
         return convert;
     }
+    
 
     public Object evaluateBody(Expr body, Environment env){
         //Swap out env for the length of the function execution

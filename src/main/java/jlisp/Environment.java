@@ -6,7 +6,7 @@ import java.util.Map;
 
 import java.util.HashMap;
 import java.util.List;
-import java.lang.*;
+import java.util.ArrayList;
 
 
 
@@ -105,12 +105,21 @@ public class Environment {
         standardEnv.put("=", new LispCallable() {
             @Override
             public int arity() {
-                return -1; //unlimited parameters
+                return 2; 
             }
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
-                return arguments;
+                if(arguments.get(0) instanceof List || arguments.get(1) instanceof List){
+                    return null;
+                }
+                double epsilon = 0.000001d;
+                if(Math.abs((Double)arguments.get(0) - (Double)arguments.get(1)) < epsilon){
+                    return true;
+                } 
+                else{
+                    return null;
+                }
             }
         });
         standardEnv.put("list", new LispCallable() {
@@ -124,6 +133,148 @@ public class Environment {
                 return arguments;
             }
         });
+        standardEnv.put("cons", new LispCallable() {
+            @Override
+            public int arity() {
+                return 2; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                if(arguments.get(1) == null){
+                    List<Object> l = new ArrayList<Object>();
+                    l.add(arguments.get(0));
+                    return l;
+                }
+                if(arguments.get(1) instanceof List){
+                    List<Object> l = (ArrayList<Object>)arguments.get(1);
+                    l.add(0, arguments.get(0));
+                    return l;
+                }
+                return new ConsCell(arguments.get(0), arguments.get(1));
+            }
+        });
+        standardEnv.put("car", new LispCallable() {
+            @Override
+            public int arity() {
+                return 1; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                if(arguments.get(0) instanceof ConsCell){
+                    return ((ConsCell)arguments.get(0)).car;
+                }   
+                else{
+                    List<Object> l = (List<Object>)arguments.get(0);
+                    if(l == null) throw new ClassCastException(); //Empty list is an invalid argument
+                    return ((List<Object>)arguments.get(0)).get(0);
+                }
+            }
+        });
+        standardEnv.put("cdr", new LispCallable() {
+            @Override
+            public int arity() {
+                return 1; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line){
+                if(arguments.get(0) instanceof ConsCell){
+                    return ((ConsCell)arguments.get(0)).cdr;
+                }   
+                else{
+                    List<Object> l = (List<Object>)arguments.get(0);
+                    if(l == null) throw new ClassCastException(); //Empty list is an invalid argument
+                    if(l.size() == 1) return null;
+                    
+                    return (l.subList(1, l.size()));
+                }
+            }
+        });
+
+        standardEnv.put("number?", new LispCallable() {
+            @Override
+            public int arity() {
+                return 1; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line){
+                if(arguments.get(0) instanceof Double){
+                    return true;
+                }
+                else{
+                    return null;
+                }
+            }
+        });
+        //TODO: Implement
+        standardEnv.put("symbol?", new LispCallable() {
+            @Override
+            public int arity() {
+                return 1; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line){
+                if(arguments.get(0) instanceof Double){
+                    return true;
+                }
+                else{
+                    return null;
+                }
+            }
+        });
+
+        standardEnv.put("list?", new LispCallable() {
+            @Override
+            public int arity() {
+                return 1; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line){
+                if(arguments.get(0) instanceof List){
+                    return true;
+                }
+                else{
+                    return null;
+                }
+            }
+        });
+
+        standardEnv.put("null?", new LispCallable() {
+            @Override
+            public int arity() {
+                return 1; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line){
+                if(arguments.get(0) == null){
+                    return true;
+                }
+                else{
+                    return null;
+                }
+            }
+        });
+
+        standardEnv.put("print", new LispCallable() {
+            @Override
+            public int arity() {
+                return 1; 
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line){
+                String str = Interpreter.stringify(arguments.get(0));
+                System.out.println(str);
+                return str;
+            }
+        });
+        
 
     }
     final Environment enclosing;

@@ -38,15 +38,6 @@ public class LispScanner {
     keywords.put("if",       IF);
     keywords.put("while",    WHILE);
     keywords.put("set",      SET);
-    keywords.put("begin",    BEGIN);
-    keywords.put("cons",     CONS);
-    keywords.put("car",      CAR);
-    keywords.put("cdr",      CDR);
-    keywords.put("number?",  NUMBER_QUEST);
-    keywords.put("sysmbol?", SYSMBOL_QUEST);
-    keywords.put("list?",    LIST_QUEST);
-    keywords.put("null?",    NULL_QUEST);
-    keywords.put("print",    PRINT);
     keywords.put("t",        T);
     keywords.put("define",   DEFINE);
   }

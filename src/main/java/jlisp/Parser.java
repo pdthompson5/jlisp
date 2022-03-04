@@ -95,7 +95,7 @@ public class Parser {
             Expr condition = expression();
             Expr ifTrue = expression();
             Expr ifFalse = expression();
-            return new Expr.Conditional(condition, ifTrue, ifFalse);
+            return new Expr.Conditional(previous(), condition, ifTrue, ifFalse);
         }
 
         return whileLoop();
@@ -105,7 +105,7 @@ public class Parser {
         if(match(WHILE)){
             Expr condition = expression();
             Expr body = expression();
-            return new Expr.While(condition, body);
+            return new Expr.While(previous(), condition, body);
         }
         return procedure();
     }
@@ -114,7 +114,6 @@ public class Parser {
     private Expr procedure(){
         //Procedures can only occur at the beginning of an s expression
         if(previous().type == LEFT_PAREN){
-            //TODO: Figure out what to do with Null
             if(peek().type == RIGHT_PAREN){
                 return new Expr.Literal(null);
             }

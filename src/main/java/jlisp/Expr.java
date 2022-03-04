@@ -43,10 +43,12 @@ abstract class Expr {
     }
 
     static class Conditional extends Expr{
+        final Token keyword;
         final Expr condition;
         final Expr ifTrue;
         final Expr ifFalse;
-        Conditional(Expr condition, Expr ifTrue, Expr ifFalse){
+        Conditional(Token keyword, Expr condition, Expr ifTrue, Expr ifFalse){
+            this.keyword = keyword;
             this.condition = condition;
             this.ifTrue = ifTrue;
             this.ifFalse = ifFalse;
@@ -104,9 +106,11 @@ abstract class Expr {
     }
 
     static class While extends Expr{
+        Token keyword;
         Expr condition;
         Expr body;
-        While(Expr condition, Expr body){
+        While(Token keyword, Expr condition, Expr body){
+            this.keyword = keyword;
             this.condition = condition;
             this.body = body;
         }
