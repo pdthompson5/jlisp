@@ -9,7 +9,7 @@ enum TokenType {
     NUMBER, IDENTIFIER,
     
     //keywords
-    IF, WHILE, SET, T, DEFINE,
+    IF, WHILE, SET, T, DEFINE, QUOTE,
 
 
     EOF

@@ -25,7 +25,7 @@ public class LispScanner {
     for(String tokenString : splitStrings){
       scanToken(tokenString);
     }
-    addToken(EOF);
+    addToken(EOF, "end-of-file", null);
     return tokens;
   }
 
@@ -40,6 +40,7 @@ public class LispScanner {
     keywords.put("set",      SET);
     keywords.put("t",        T);
     keywords.put("define",   DEFINE);
+    keywords.put("quote",    QUOTE);
   }
 
 
@@ -60,8 +61,8 @@ public class LispScanner {
 
     switch (tokenString) {
       case "": break;
-      case "(": addToken(LEFT_PAREN); break;
-      case ")": addToken(RIGHT_PAREN); break;
+      case "(": addToken(LEFT_PAREN, tokenString, null); break;
+      case ")": addToken(RIGHT_PAREN, tokenString, null); break;
       // case "-": addToken(MINUS); break;   
       // case "+": addToken(PLUS); break;   
       // case "*": addToken(STAR); break;   
@@ -93,7 +94,7 @@ public class LispScanner {
       //Add identifier if no keyword match
       identifier(token);
     } else{
-      addToken(type);
+      addToken(type, token, null);
     }
   }
 
@@ -112,11 +113,6 @@ public class LispScanner {
 
   private boolean isDigit(char c){
     return c >= '0' && c <= '9';
-  }
-
-  //Add token if literal is null
-  private void addToken(TokenType type) {
-      addToken(type, "", null);
   }
 
 

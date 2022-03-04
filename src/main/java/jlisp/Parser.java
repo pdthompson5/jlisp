@@ -107,6 +107,36 @@ public class Parser {
             Expr body = expression();
             return new Expr.While(previous(), condition, body);
         }
+        return quote();
+    }
+
+    private Expr quote(){
+        if(match(QUOTE)){
+            Token keyword = previous();
+            List<Token> list = new ArrayList<>();
+            //Add sequence of tokens
+            if(peek().type == LEFT_PAREN){
+                list.add(advance());
+                
+                int rightParensNeeded = 1;
+                while(rightParensNeeded > 0){
+                    if(peek().type == RIGHT_PAREN){
+                        rightParensNeeded--;
+                    }
+                    if(peek().type == LEFT_PAREN){
+                        rightParensNeeded++;
+                    }
+                    list.add(advance());
+                }
+            }
+            else{
+                //Add single token
+                list.add(advance());
+            }
+           
+            
+            return new Expr.Quote(keyword, list);
+        }
         return procedure();
     }
 

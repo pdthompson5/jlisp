@@ -17,6 +17,7 @@ abstract class Expr {
         R visitVariableDefinitionExpr(VariableDefinition expr);
         R visitProcedureExpr(Procedure expr);
         R visitWhileExpr(While expr);
+        R visitQuoteExpr(Quote expr);
       }
     abstract <R> R accept(Visitor<R> visitor);
    
@@ -119,5 +120,17 @@ abstract class Expr {
           return visitor.visitWhileExpr(this);
         }
     }
+    static class Quote extends Expr{
+      Token keyword;
+      List<Token> inner;
+      Quote(Token keyword, List<Token> inner){
+          this.keyword = keyword;
+          this.inner = inner;
+      }
+      @Override
+      <R> R accept(Visitor<R> visitor) {
+        return visitor.visitQuoteExpr(this);
+      }
+  }
     
 }

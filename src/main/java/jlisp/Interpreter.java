@@ -4,6 +4,8 @@ package jlisp;
 import java.util.List;
 import java.util.ArrayList;
 
+import static jlisp.TokenType.*;
+
 //While loops, conditionals and functions do not eval all of their sub expressions
 public class Interpreter implements Expr.Visitor<Object>{
     Environment globals = new Environment();
@@ -64,7 +66,12 @@ public class Interpreter implements Expr.Visitor<Object>{
         try{
             return func.call(this, values, expr.name.line);
         } catch (ClassCastException error){
-            throw new RuntimeError(expr.name, "Invalid argument type for function " + expr.name.lexeme);
+            String args = "Arguments recieved: ";
+            for(Object val : values){
+                args += stringify(val);
+                args += " ";
+            }
+            throw new RuntimeError(expr.name, "Invalid argument type for function '" + expr.name.lexeme + "'. " + args + "");
         } 
     }
     
@@ -90,6 +97,39 @@ public class Interpreter implements Expr.Visitor<Object>{
 
         return val;
     }
+
+    //TODO: Quote mostly works but it is clunky and breaks if you intensley combine lists and symbols 
+    @Override
+    public Object visitQuoteExpr(Expr.Quote expr){
+        //Quote will either return a literal, a String or a list of literals 
+        List<Token> tokens = expr.inner;
+        if(tokens.get(0).type == NUMBER || tokens.get(0).type == T) return tokens.get(0).literal;
+        if(tokens.size() > 1){
+            if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == RIGHT_PAREN) return null;
+
+            //check if quote operand is a list of constants 
+            if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == NUMBER){
+                List<Object> list = new ArrayList<>();
+                int current = 1;
+                //Add all literals to the list
+                while(current < tokens.size() - 1){
+                    list.add(tokens.get(current).literal);
+                    current++;
+                }
+                return list;
+            }
+        }
+
+        String str = "";
+        for(Token t: tokens){
+            str += t.toString();
+            str += " ";
+        }
+         
+        return str;
+    }
+
+    //Helper functions 
 
 
     private boolean isTruthy(Object val, Token t){

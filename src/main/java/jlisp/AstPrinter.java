@@ -58,6 +58,11 @@ public class AstPrinter implements Expr.Visitor<String>{
         return parenthesize("while", expr.body);
       }
 
+      @Override
+      public String visitQuoteExpr(Expr.Quote expr){
+        return "quote";
+      }
+
 
     
       //All this does is put parenes around the subexpressions 
