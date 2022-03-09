@@ -3,7 +3,8 @@ FILE := test_file.lisp
 
 .Phony: jlisp
 jlisp:
-	mvn clean compile exec:java -Dexec.args="$(FILE)"
+	mvn clean compile 
+	mvn exec:java -Dexec.args="$(FILE)"
 
 .PHONY: jlisp_repl
 jlisp_repl:

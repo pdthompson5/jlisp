@@ -1,0 +1,11 @@
+(set a 2) 
+(set b 4)
+(set bList (quote (1 2 3)))
+
+(= a b)
+(= a bList)
+(= a 2)
+(> a b)
+(> b a)
+(< a b)
+(< b a)

@@ -1,15 +1,11 @@
 package jlisp;
 
-//because lisp is so simple, most of the builtins can be defined and added to the gloabal evn
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-import static jlisp.TokenType.*;
-
-    //Begin -> empty function with endless params -> Expr... arguments;
  
 public class Environment {
     //Standard env 
@@ -79,7 +75,7 @@ public class Environment {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
-                if((Double)arguments.get(0) > (Double)arguments.get(1)){
+                if(Double.compare((Double)arguments.get(0), (Double)arguments.get(1)) > 0){
                     return true;
                 } else{
                     return null;
@@ -94,7 +90,7 @@ public class Environment {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
-                if((Double)arguments.get(0) < (Double)arguments.get(1)){
+                if(Double.compare((Double)arguments.get(0), (Double)arguments.get(1)) < 0){
                     return true;
                 } else{
                     return null;
@@ -109,11 +105,10 @@ public class Environment {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
-                if(arguments.get(0) instanceof List || arguments.get(1) instanceof List){
+                if((arguments.get(0) instanceof List) || (arguments.get(1) instanceof List)){
                     return null;
                 }
-                double epsilon = 0.000001d;
-                if(Math.abs((Double)arguments.get(0) - (Double)arguments.get(1)) < epsilon){
+                if(Double.compare((Double)arguments.get(0), (Double)arguments.get(1)) == 0 ){
                     return true;
                 } 
                 else{
@@ -130,6 +125,17 @@ public class Environment {
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
                 return arguments;
+            }
+        });
+        standardEnv.put("begin", new LispCallable() {
+            @Override
+            public int arity() {
+                return -1; //unlimited parameters
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                return arguments.get(arguments.size()-1);
             }
         });
         standardEnv.put("cons", new LispCallable() {
@@ -161,41 +167,6 @@ public class Environment {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
-                //TODO: Determine if I want to keep this. This is a really niche case
-                //This handles the unusual case of a symbol being the first item in a list i.e. (car (quote ((+ 2 3) 1 2)))
-                if(arguments.get(0) instanceof String){
-                    String source = (String)arguments.get(0);
-
-                    //trim off outer parenthesis
-                    source = source.substring(1, source.length() - 2);
-
-                    //Scan the source
-                    LispScanner scanner = new LispScanner(source);
-                    List<Token> tokens = scanner.scanTokens();
-                    String s = "";
-                    //case: Symbol in list of symbols 
-                    if(tokens.get(0).type == LEFT_PAREN){
-                        int current = 1;
-                        s += tokens.get(0).toString();
-                        
-                        int rightParensNeeded = 1;
-                        while(rightParensNeeded > 0){
-                            if(tokens.get(current).type == RIGHT_PAREN){
-                                rightParensNeeded--;
-                            }
-                            if(tokens.get(current).type == LEFT_PAREN){
-                                rightParensNeeded++;
-                            }
-                            s += tokens.get(current).toString();
-                            s += " ";
-                            current++;
-                        }
-                    }
-                    else{
-                        throw new ClassCastException(); //needs to be a list for car
-                    }
-                    return s;
-                }
                 if(arguments.get(0) instanceof ConsCell){
                     return ((ConsCell)arguments.get(0)).car;
                 }   
@@ -252,6 +223,10 @@ public class Environment {
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line){
                 if(arguments.get(0) instanceof String){
+                    //if true not a symbol, it is an unevaluated expression produced by quote
+                    if(((String)arguments.get(0)).contains("(")){
+                        return null;
+                    }
                     return true;
                 }
                 else{
@@ -319,7 +294,7 @@ public class Environment {
                 if(arguments.get(0) instanceof String){
                     LispScanner scanner = new LispScanner((String)arguments.get(0));
                     Parser parser = new Parser(scanner.scanTokens());
-                    //There should only ever be one expression
+                    //There should only ever be one parsed top level expression
                     return interpreter.evaluate(parser.parse().get(0));
                 }
                 return arguments.get(0);

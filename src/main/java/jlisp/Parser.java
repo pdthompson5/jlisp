@@ -1,15 +1,9 @@
 package jlisp;
-//We are going to end up with a list of expressions rather than just 1
-//If expressions are all grouped by parens then there will only be one at the highest level 
-//What can we have at the highest level? Definitiley not everything 
-//Maybe just atoms and lists, no function calls 
+
+import static jlisp.TokenType.*;
 
 import java.util.ArrayList;
 import java.util.List;
-//TODO: Set will only create a global variable , colinked recursion possibly supported
-
-
-import static jlisp.TokenType.*;
 
 public class Parser {
 
@@ -25,7 +19,14 @@ public class Parser {
     List<Expr> parse() {
         List<Expr> expressions = new ArrayList<>();
         while(!isAtEnd()){
-            expressions.add(expression());
+            try{
+                expressions.add(expression());
+            }
+            catch(OutOfMemoryError e){
+                //This handles the case of accidentally using c-style function calls i.e.: (foo (1 2 3))
+                Jlisp.error("Expected Expression", peek().line);
+            }
+            
         }
 
         return expressions;
@@ -143,7 +144,8 @@ public class Parser {
 
     private Expr procedure(){
         //Procedures can only occur at the beginning of an s expression
-        if(previous().type == LEFT_PAREN){
+        //Ignore number in the case of a quote list: (quote (1 2 3))
+        if(previous().type == LEFT_PAREN && peek().type != NUMBER){
             if(peek().type == RIGHT_PAREN){
                 return new Expr.Literal(null);
             }

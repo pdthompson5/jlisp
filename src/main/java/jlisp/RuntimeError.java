@@ -1,5 +1,4 @@
 package jlisp;
-//TODO: Not sure if I need this class
 public class RuntimeError extends RuntimeException{
     final Token token;
 

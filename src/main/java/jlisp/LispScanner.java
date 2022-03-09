@@ -3,11 +3,14 @@ package jlisp;
 
 import java.util.HashMap;
 import java.util.Map;
+
+
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import static jlisp.TokenType.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 //Whitespace is ocasionally important to us as spaces are deliminators in s-expressions 
 //Can I take care of this issue during Scanning? I think so
@@ -22,7 +25,28 @@ public class LispScanner {
 
   List<Token> scanTokens(){
     ArrayList<String> splitStrings = splitBySpace();
-    for(String tokenString : splitStrings){
+    for(int i = 0; i < splitStrings.size(); i++){
+      String tokenString = splitStrings.get(i);
+
+      //Split whitespace characters
+      if(tokenString.isBlank() && tokenString.length() > 1){
+        for(char c : tokenString.toCharArray()){
+          scanToken(Character.toString(c));
+        }
+        continue;
+      }
+
+      //Ignore rest of line if comment
+      if(tokenString.contains(";")){
+        //Ignore text until new line or eof 
+        while(!(tokenString.equals("\n") || i == splitStrings.size()-1)){
+          i++;
+          tokenString = splitStrings.get(i);
+        }
+        line++;
+        continue;
+      }
+
       scanToken(tokenString);
     }
     addToken(EOF, "end-of-file", null);
@@ -46,19 +70,11 @@ public class LispScanner {
 
   ArrayList<String> splitBySpace(){
     String sourceWithSpaces = source.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ");
+    sourceWithSpaces = sourceWithSpaces.replaceAll("\n", " \n ");
     return new ArrayList<String>(Arrays.asList(sourceWithSpaces.split(" ")));
   }
 
   void scanToken(String tokenString){
-    //Split up white space characters
-    //TODO: Find a better solution to this issue
-    if(tokenString.isBlank() && tokenString.length() > 1){
-      for(char c : tokenString.toCharArray()){
-        scanToken(Character.toString(c));
-      }
-      return;
-    }
-
     switch (tokenString) {
       case "": break;
       case "(": addToken(LEFT_PAREN, tokenString, null); break;
@@ -71,6 +87,7 @@ public class LispScanner {
       // case ">": addToken(GREATER_THAN); break;   
       // case "<": addToken(LESS_THAN); break;
       case "t": addToken(T, null, true); break;
+      case ";": comment(); break; 
       case "\n": line++; break;
       case "\t": break;
       case "\r": break;
@@ -86,6 +103,10 @@ public class LispScanner {
     }
   }
 
+  //Skip rest of the line 
+  private void comment(){
+
+  }
 
   private void keyword(String token){
     //Try to match to a keyword 

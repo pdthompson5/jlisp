@@ -2,6 +2,8 @@ package jlisp;
 
 import java.util.*;
 
+//This class essentially converts parsed expressions back into Strings
+
 public class AstPrinter implements Expr.Visitor<String>{
       String print(Expr expr) {
         return expr.accept(this);
@@ -16,7 +18,7 @@ public class AstPrinter implements Expr.Visitor<String>{
       public String visitFunctionDefinitionExpr(Expr.FunctionDefinition expr) {
         StringBuilder builder = new StringBuilder();
     
-        builder.append("(").append(expr.name.lexeme).append(" (");
+        builder.append("(define ").append(expr.name.lexeme).append(" (");
 
 
         for (Token token : expr.parameters) {
@@ -26,15 +28,13 @@ public class AstPrinter implements Expr.Visitor<String>{
         }
 
         builder.append(") ").append(expr.body.accept(this)).append(")");
-
-
-    
         return builder.toString();
       }
     
       @Override
       public String visitLiteralExpr(Expr.Literal expr) {
-        if (expr.value == null) return "nil";
+        if (expr.value == null) return "()";
+        if (expr.value instanceof Boolean) return "t";
         return expr.value.toString();
       }
     
@@ -50,22 +50,28 @@ public class AstPrinter implements Expr.Visitor<String>{
 
       @Override
       public String visitVariableDefinitionExpr(Expr.VariableDefinition expr){
-        return parenthesize("set" + expr.name, expr.value);
+        return parenthesize("set " + expr.name, expr.value);
       }
 
       @Override
       public String visitWhileExpr(Expr.While expr){
-        return parenthesize("while", expr.body);
+        return parenthesize("while", expr.condition, expr.body);
       }
 
       @Override
       public String visitQuoteExpr(Expr.Quote expr){
-        return "quote";
+        String s = "( quote ";
+        for(Token token : expr.inner){
+          s += token.toString();
+          s += " ";
+        }
+        s+= ")";
+        return s;
       }
 
 
     
-      //All this does is put parenes around the subexpressions 
+      //recursively string print subexpressions and add parenthesis
       private String parenthesize(String name, Expr... exprs) {
         StringBuilder builder = new StringBuilder();
     
@@ -80,14 +86,13 @@ public class AstPrinter implements Expr.Visitor<String>{
         return builder.toString();
       }
 
-      // //All this does is put parenes around the subexpressions 
+      //Overload for real lists 
       private String parenthesize(String name, List<Expr> exprs) {
         StringBuilder builder = new StringBuilder();
     
         builder.append("(").append(name);
         for (Expr expr : exprs) {
           builder.append(" ");
-          //recursive call to parenthesize all subexpressions
           builder.append(expr.accept(this));
         }
         builder.append(")");

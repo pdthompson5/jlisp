@@ -2,15 +2,18 @@ package jlisp;
 
 
 import java.util.List;
-import java.util.ArrayList;
 
 import static jlisp.TokenType.*;
+
+import java.util.ArrayList;
 
 //While loops, conditionals and functions do not eval all of their sub expressions
 public class Interpreter implements Expr.Visitor<Object>{
     Environment globals = new Environment();
 
     Object evaluate(Expr expr) {
+        // AstPrinter printer = new AstPrinter();
+        // System.out.println("Evaluating Expression:" + printer.print(expr));
         try{
             return expr.accept(this);
         }
@@ -99,34 +102,79 @@ public class Interpreter implements Expr.Visitor<Object>{
     }
 
     //TODO: Quote mostly works but it is clunky and breaks if you intensley combine lists and symbols 
+    //What if I just parse out the tokens and see what they are?
+    // @Override
+    // public Object visitQuoteExpr(Expr.Quote expr){
+    //     //Quote will either return a literal, a String or a list of literals 
+    //     List<Token> tokens = expr.inner;
+    //     if(tokens.get(0).type == NUMBER || tokens.get(0).type == T) return tokens.get(0).literal;
+    //     if(tokens.size() > 1){
+    //         if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == RIGHT_PAREN) return null;
+
+    //         //check if quote operand is a list of constants 
+    //         if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == NUMBER){
+    //             List<Object> list = new ArrayList<>();
+    //             int current = 1;
+    //             //Add all literals to the list
+    //             while(current < tokens.size() - 1){
+    //                 list.add(tokens.get(current).literal);
+    //                 current++;
+    //             }
+    //             return list;
+    //         }
+    //     }
+
+    //     String str = "";
+    //     for(Token t: tokens){
+    //         str += t.toString();
+    //         str += " ";
+    //     }
+         
+    //     return str;
+    // }
+
     @Override
     public Object visitQuoteExpr(Expr.Quote expr){
         //Quote will either return a literal, a String or a list of literals 
         List<Token> tokens = expr.inner;
-        if(tokens.get(0).type == NUMBER || tokens.get(0).type == T) return tokens.get(0).literal;
-        if(tokens.size() > 1){
-            if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == RIGHT_PAREN) return null;
 
-            //check if quote operand is a list of constants 
-            if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == NUMBER){
-                List<Object> list = new ArrayList<>();
-                int current = 1;
-                //Add all literals to the list
-                while(current < tokens.size() - 1){
-                    list.add(tokens.get(current).literal);
-                    current++;
+        //Peel parenthesis off of a list of literals so the parser will recognize the expression
+        if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == NUMBER){
+            tokens.remove(0);
+            tokens.remove(tokens.size()-1);
+        }
+        
+        //Add EOF token so parser knows when to stop
+        tokens.add(new Token(EOF, "end-of-file", null, tokens.get(tokens.size()-1).line));
+        
+
+        Parser parser = new Parser(tokens);
+        List<Expr> inner = parser.parse();
+        AstPrinter printer = new AstPrinter();
+
+        if(inner.size() > 1){
+            List<Object> l = new ArrayList<>();
+            
+            for(Expr e : inner){
+                if(e == null){
+                    l.add(null);
                 }
-                return list;
+                //Evaluate literals
+                else if(e instanceof Expr.Literal){
+                    l.add(evaluate(e));
+                }
+                else{
+                    l.add(printer.print(e));
+                }
             }
-        }
 
-        String str = "";
-        for(Token t: tokens){
-            str += t.toString();
-            str += " ";
+            return l;
         }
-         
-        return str;
+        else{   
+            if(inner.get(0) == null) return null;
+            if(inner.get(0) instanceof Expr.Literal) return evaluate(inner.get(0)); 
+            return printer.print(inner.get(0));
+        }
     }
 
     //Helper functions 
