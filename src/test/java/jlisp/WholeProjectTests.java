@@ -114,10 +114,14 @@ public class WholeProjectTests {
     void testWhileLoops(){
         runAndVerify("WhileLoops");
     }
-
-    
-
-
+    @Test
+    void testRecursion(){
+        runAndVerify("Recursion");
+    }
+    @Test
+    void testInsertionSort(){
+        runAndVerify("InsertionSort");
+    }
 
     // @TestFactory
     // Collection<DynamicTest> All(){

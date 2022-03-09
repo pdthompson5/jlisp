@@ -152,7 +152,7 @@ public class Environment {
                     return l;
                 }
                 if(arguments.get(1) instanceof List){
-                    List<Object> l = (ArrayList<Object>)arguments.get(1);
+                    List<Object> l = (List<Object>)arguments.get(1);
                     l.add(0, arguments.get(0));
                     return l;
                 }

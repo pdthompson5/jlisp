@@ -26,23 +26,6 @@
     )
 )
 
-;; Helper function for insert 
-(define insert_recurse(listA index element i)
-    (begin
-        (if (= i index)
-            (cons element listA)
-            (cons 
-                (car listA) 
-                (insert_recurse((cdr listA) index element (+ i 1)))
-            )
-        )
-    )
-)
-
-(define insert (listA index element)
-    (insert_recurse listA index element 0)
-)
-
 
 (length (list 1 2 3))
 (nth (list 1 2 3) 1)
@@ -53,8 +36,3 @@
 
 
 
-;; (define insertion_sort (listA) (
-;;     (begin 
-;;         (let )
-;;     )
-;; ))

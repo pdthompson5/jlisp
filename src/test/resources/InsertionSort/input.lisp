@@ -73,7 +73,3 @@
 (nth (list 1 2 3) 1)
 (insert (list 1 2 3) 1 15)
 (insertion_sort (list 8 4 5 7 3 2 5 7 0))
-
-
-
-

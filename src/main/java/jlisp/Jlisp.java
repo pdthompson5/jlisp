@@ -62,10 +62,10 @@ public class Jlisp{
         LispScanner scanner = new LispScanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        for(Token token : tokens){
-            System.out.println(token.type.toString() + token);
+        // for(Token token : tokens){
+        //     System.out.println(token.type.toString() + token);
             
-        }
+        // }
 
         Parser parser = new Parser(tokens);
         List<Expr> tree = parser.parse();

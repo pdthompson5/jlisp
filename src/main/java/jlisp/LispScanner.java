@@ -87,25 +87,23 @@ public class LispScanner {
       // case ">": addToken(GREATER_THAN); break;   
       // case "<": addToken(LESS_THAN); break;
       case "t": addToken(T, null, true); break;
-      case ";": comment(); break; 
       case "\n": line++; break;
       case "\t": break;
       case "\r": break;
     
       default:
+      //Normal number literals
       if(isDigit(tokenString.charAt(0))){
+        addToken(NUMBER, tokenString, Double.parseDouble(tokenString.trim()));
+      }
+      //Negative number literals
+      else if(tokenString.length() > 1 && tokenString.charAt(0) == '-' && isDigit(tokenString.charAt(1))){
         addToken(NUMBER, tokenString, Double.parseDouble(tokenString.trim()));
       }
       else{
         keyword(tokenString);
       }
-        
     }
-  }
-
-  //Skip rest of the line 
-  private void comment(){
-
   }
 
   private void keyword(String token){
