@@ -105,7 +105,8 @@ public class Environment {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
-                if((arguments.get(0) instanceof List) || (arguments.get(1) instanceof List)){
+                if((arguments.get(0) instanceof List) || (arguments.get(1) instanceof List) || 
+                    arguments.get(0) instanceof String || arguments.get(1) instanceof String){
                     return null;
                 }
                 if(Double.compare((Double)arguments.get(0), (Double)arguments.get(1)) == 0 ){
@@ -143,7 +144,7 @@ public class Environment {
             public int arity() {
                 return 2; 
             }
-
+            //TODO: Implement deep copies of arrays 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
                 if(arguments.get(1) == null){
@@ -151,8 +152,12 @@ public class Environment {
                     l.add(arguments.get(0));
                     return l;
                 }
-                if(arguments.get(1) instanceof List){
-                    List<Object> l = (List<Object>)arguments.get(1);
+                Object arg1 = arguments.get(1);
+                if(arg1 instanceof String){
+                    arg1 = interpreter.toList((String)arg1);
+                }
+                if(arg1 instanceof List){
+                    List<Object> l = (List<Object>)arg1;
                     l.add(0, arguments.get(0));
                     return l;
                 }
@@ -167,13 +172,17 @@ public class Environment {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line) {
+                Object arg = arguments.get(0);
+                if(arguments.get(0) instanceof String){
+                    arg = interpreter.toList((String)arg);
+                }
                 if(arguments.get(0) instanceof ConsCell){
                     return ((ConsCell)arguments.get(0)).car;
                 }   
                 else{
-                    List<Object> l = (List<Object>)arguments.get(0);
+                    List<Object> l = (List<Object>)arg;
                     if(l == null) throw new ClassCastException(); //Empty list is an invalid argument
-                    return ((List<Object>)arguments.get(0)).get(0);
+                    return ((List<Object>)arg).get(0);
                 }
             }
         });
@@ -185,11 +194,15 @@ public class Environment {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line){
+                Object arg = arguments.get(0);
+                if(arguments.get(0) instanceof String){
+                    arg = interpreter.toList((String)arg);
+                }
                 if(arguments.get(0) instanceof ConsCell){
                     return ((ConsCell)arguments.get(0)).cdr;
                 }   
                 else{
-                    List<Object> l = (List<Object>)arguments.get(0);
+                    List<Object> l = (List<Object>)arg;
                     if(l == null) throw new ClassCastException(); //Empty list is an invalid argument
                     if(l.size() == 1) return null;
                     
@@ -223,7 +236,7 @@ public class Environment {
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line){
                 if(arguments.get(0) instanceof String){
-                    //if true not a symbol, it is an unevaluated expression produced by quote
+                    //if true not a symbol, it is an unevaluated expression/list produced by quote
                     if(((String)arguments.get(0)).contains("(")){
                         return null;
                     }
@@ -244,6 +257,9 @@ public class Environment {
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments, int line){
                 if(arguments.get(0) instanceof List){
+                    return true;
+                }
+                else if (arguments.get(0) instanceof String && ((String)arguments.get(0)).contains("(")){
                     return true;
                 }
                 else{

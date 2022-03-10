@@ -2,6 +2,7 @@ package jlisp;
 
 
 import java.util.List;
+import java.util.ListIterator;
 
 import static jlisp.TokenType.*;
 
@@ -52,7 +53,12 @@ public class Interpreter implements Expr.Visitor<Object>{
         //Evaluate arguments 
         List<Object> values = new ArrayList<>();
         for(Expr argument : expr.arguments){
-            values.add(evaluate(argument));
+            Object value = evaluate(argument);
+            //if argument is a list, deep copy that list 
+            if(value instanceof List){
+                value = deepCopyList((List<Object>)value);
+            }
+            values.add(value);
         }
 
         //Fetch the function
@@ -85,6 +91,11 @@ public class Interpreter implements Expr.Visitor<Object>{
 
     @Override
     public Object visitVariableDefinitionExpr(Expr.VariableDefinition expr){
+        Object value = evaluate(expr.value);
+        //deep copy lists
+        if(value instanceof List){
+            value = deepCopyList((List<Object>) value);
+        }
         globals.defineVar(expr.name.lexeme, evaluate(expr.value));
         return expr.name.lexeme;
     }
@@ -101,85 +112,137 @@ public class Interpreter implements Expr.Visitor<Object>{
         return val;
     }
 
-    //TODO: Quote mostly works but it is clunky and breaks if you intensley combine lists and symbols 
-    //What if I just parse out the tokens and see what they are?
+    //To make quote work lists can either be an actual java list or a String. This method converts a String to a java list.
+    //I am willing to conceed that there may be a better way to implement quote, but as far as I can tell this works.
+    public List<Object> toList(String source){
+        LispScanner scanner = new LispScanner(source);
+        List<Token> tokens = scanner.scanTokens();
+
+
+        //Peel parenthesis off the list 
+        if(tokens.get(0).type == LEFT_PAREN){
+            tokens.remove(0);
+            //elimainate eof and right paren
+            tokens.remove(tokens.size()-1);
+            tokens.remove(tokens.size()-1);
+        }
+
+        List<Object> l = new ArrayList<>();
+        for(int i = 0; i < tokens.size(); i++){
+            //evaluate null 
+            Token t = tokens.get(i);
+            if(i < tokens.size()-1 && t.type == LEFT_PAREN && tokens.get(i+1).type == RIGHT_PAREN){
+                l.add(null);
+            } 
+            //Add nested expression/list to list as a string 
+            if(t.type == LEFT_PAREN){
+                String s = "";
+                s += "("; i++; //consume left paren
+                while(tokens.get(i).type != RIGHT_PAREN){
+                    s += tokens.get(i).toString() + " ";
+                    i++;
+                }
+                s += ")"; //consume right paren
+                l.add(s);
+            }
+            //evaluate number 
+            else if(t.type == NUMBER){
+                l.add(t.literal);
+            }  
+            //evaluate t
+            else if(t.type == T){
+                l.add(true);
+            } 
+            else{
+                l.add(t.toString() + " ");
+            }
+        }
+        return l;
+    }
+    
     // @Override
     // public Object visitQuoteExpr(Expr.Quote expr){
     //     //Quote will either return a literal, a String or a list of literals 
+    //     //Still having issues: If it is a list then we will only interpret literals?
+    //     //Idea: Store + 1 2 as a list 
+    //     //only ever return a string if it is an indentifier?
+
+    //     //if I ever have more than one expression then punt it as a string 
+
     //     List<Token> tokens = expr.inner;
-    //     if(tokens.get(0).type == NUMBER || tokens.get(0).type == T) return tokens.get(0).literal;
-    //     if(tokens.size() > 1){
-    //         if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == RIGHT_PAREN) return null;
 
-    //         //check if quote operand is a list of constants 
-    //         if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == NUMBER){
-    //             List<Object> list = new ArrayList<>();
-    //             int current = 1;
-    //             //Add all literals to the list
-    //             while(current < tokens.size() - 1){
-    //                 list.add(tokens.get(current).literal);
-    //                 current++;
+    //     //Peel parenthesis off of a list of literals so the parser will recognize the expression
+    //     if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == NUMBER){
+    //         tokens.remove(0);
+    //         tokens.remove(tokens.size()-1);
+    //     }
+        
+    //     //Add EOF token so parser knows when to stop
+    //     tokens.add(new Token(EOF, "end-of-file", null, tokens.get(tokens.size()-1).line));
+        
+
+    //     Parser parser = new Parser(tokens);
+    //     List<Expr> inner = parser.parse();
+    //     AstPrinter printer = new AstPrinter();
+
+    //     //I only want to evaluate the highest expression in the list, everything else will remain strings 
+
+
+    //     if(inner.size() > 1){
+    //         List<Object> l = new ArrayList<>();
+            
+    //         for(Expr e : inner){
+    //             if(e == null){
+    //                 l.add(null);
     //             }
-    //             return list;
+    //             //Evaluate literals
+    //             else if(e instanceof Expr.Literal){
+    //                 l.add(evaluate(e));
+    //             }
+    //             else{
+    //                 l.add(printer.print(e));
+    //             }
     //         }
-    //     }
 
-    //     String str = "";
-    //     for(Token t: tokens){
-    //         str += t.toString();
-    //         str += " ";
+    //         return l;
     //     }
-         
-    //     return str;
+    //     else{   
+    //         if(inner.get(0) == null) return null;
+    //         if(inner.get(0) instanceof Expr.Literal) return evaluate(inner.get(0)); 
+    //         return printer.print(inner.get(0));
+    //     }
     // }
+
+
+
 
     @Override
     public Object visitQuoteExpr(Expr.Quote expr){
-        //Quote will either return a literal, a String or a list of literals 
         List<Token> tokens = expr.inner;
 
-        //Peel parenthesis off of a list of literals so the parser will recognize the expression
-        if(tokens.get(0).type == LEFT_PAREN && tokens.get(1).type == NUMBER){
-            tokens.remove(0);
-            tokens.remove(tokens.size()-1);
-        }
-        
-        //Add EOF token so parser knows when to stop
-        tokens.add(new Token(EOF, "end-of-file", null, tokens.get(tokens.size()-1).line));
-        
+        //evaluate null 
+        if(expr.inner.size() > 1 && expr.inner.get(0).type == LEFT_PAREN && expr.inner.get(1).type == RIGHT_PAREN) return null;
+        //evaluate number 
+        if(expr.inner.get(0).type == NUMBER)  return expr.inner.get(0).literal; 
+        //evaluate t
+        if(expr.inner.get(0).type == T) return true;
 
-        Parser parser = new Parser(tokens);
-        List<Expr> inner = parser.parse();
-        AstPrinter printer = new AstPrinter();
-
-        if(inner.size() > 1){
-            List<Object> l = new ArrayList<>();
-            
-            for(Expr e : inner){
-                if(e == null){
-                    l.add(null);
-                }
-                //Evaluate literals
-                else if(e instanceof Expr.Literal){
-                    l.add(evaluate(e));
-                }
-                else{
-                    l.add(printer.print(e));
-                }
+        //Save the expression as an unevaluated String
+        String s = "";
+        for(int i = 0; i < tokens.size(); i++){
+            Token t = tokens.get(i);
+            if(i == tokens.size() - 1){
+                s += t.toString();
             }
-
-            return l;
+            else{
+                s += t.toString() + " ";
+            }
+            
         }
-        else{   
-            if(inner.get(0) == null) return null;
-            if(inner.get(0) instanceof Expr.Literal) return evaluate(inner.get(0)); 
-            return printer.print(inner.get(0));
-        }
+        return s;
     }
 
     //Helper functions 
-
-
     private boolean isTruthy(Object val, Token t){
         if(val == null){
             return false;
@@ -249,5 +312,28 @@ public class Interpreter implements Expr.Visitor<Object>{
         globals = old;
         return val;
     }
+
+
+    //This function creates a deep copy of a "Lispy" list. Our lists can only contain doubles, strings and lists 
+    private List<Object> deepCopyList(List<Object> list){
+        List<Object> copy = new ArrayList<Object>();
+        for(Object i : list){
+            //Strings and Doubles are immutable so we can just add them 
+            if(i instanceof Double){
+                copy.add(i);
+            }
+            if(i instanceof String){
+                copy.add(i);
+            }
+            //deep copy sublists
+            if(i instanceof List){
+                copy.add(deepCopyList((List<Object>)i));
+            }
+        }
+        return copy;
+    }
+
+
+
     
 }

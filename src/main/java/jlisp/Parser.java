@@ -24,6 +24,8 @@ public class Parser {
             }
             catch(OutOfMemoryError e){
                 //This handles the case of accidentally using c-style function calls i.e.: (foo (1 2 3))
+                System.out.println(peek().lexeme);
+                System.out.println(current);
                 Jlisp.error("Expected Expression", peek().line);
             }
             
@@ -38,6 +40,7 @@ public class Parser {
         }
         return variable();
     }
+
 
 
 
@@ -183,6 +186,8 @@ public class Parser {
         return null;
     }   
 
+
+    //Helper functions: Mostly directly borrowed from crafting interpreters 
     private boolean match(TokenType... types) {
         for (TokenType type : types) {
           if (check(type)) {
@@ -233,5 +238,6 @@ public class Parser {
 
     private void error(Token token, String message){
         Jlisp.error(message, token.line);
-    }   
+    }
+    
 }

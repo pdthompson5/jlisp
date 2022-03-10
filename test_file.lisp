@@ -12,6 +12,8 @@
     )
 )
 
+
+
 ;; Returns the nth element of the list
 (define nth (listA index)
     (begin
@@ -22,7 +24,19 @@
                 (set i (+ i 1))
             )
         )
+        
         (car listA)
+    )
+)
+
+(define nth2d (listA index1 index2)
+    (nth (nth listA index1) index2)
+)
+
+(define max (intA intB)
+    (if (> intA intB)
+        intA
+        intB
     )
 )
 
@@ -42,37 +56,65 @@
     (insert_recurse listA index element 0)
 )
 
-;; Simple insertion sort algorithm. Returns a sorted list.
-(define insertion_sort(listA)
-    (begin
-        (set sorted (list (car listA)))
-        (set i 1)
-        (while (< i (length listA))
-            (begin
-                (set current (nth listA i))
-                (set j 0)
-                (set insertIndex (length sorted))
-                (while (< j (length sorted))
-                    (if (< current (nth sorted j))
-                        (begin 
-                            (set insertIndex j)
-                            (set j (length sorted)) ;;aka break
-                        )
-                        (set j (+ j 1))
-                    ) 
-                )
-                (set sorted (insert sorted insertIndex current))
-                (set i (+ i 1))
-            )
+(define remove_recurse(listA index i)
+    (if (= i index)
+        (cdr listA)
+        (cons 
+            (car listA) 
+            (remove_recurse (cdr listA) index (+ i 1) )
         )
-        sorted
     )
 )
 
-(length (list 1 2 3))
-(nth (list 1 2 3) 1)
-(insert (list 1 2 3) 1 15)
-(insertion_sort (list 8 4 5 7 3 2 5 7 0))
+(define remove(listA index)
+    (remove_recurse listA index 0)
+)
+
+(define replace(listA index element)
+    (insert (remove listA index) index element)
+)
+
+(define insert2d (listA index1 index2 element)
+    (replace listA index1 (insert (nth listA index1) index2 element))
+)
+
+(define replace2d (listA index1 index2 element)
+    (replace listA index1 (replace (nth listA index1) index2 element))
+)
+
+
+
+;; (define knapsack (values weights item_number capacity)
+;;     (begin
+;;         (set table ())
+;;         (set i 0)
+;;         (while (i ))
+        
+;;     )
+;; )
+
+
+(set table (list (list 1 2 3) (list 1 2 3) (list 1 2 3)))
+table
+(nth2d table 0 2)
+
+
+
+(insert2d table 0 2 15)
+(replace2d table 0 2 15)
+
+
+
+;; (set test (list 1 2 3))
+;; (set test2 test)
+
+;; test 
+;; test2
+
+;; (set test (cdr test))
+
+;; test 
+;; test2
 
 
 

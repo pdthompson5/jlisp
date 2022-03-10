@@ -122,6 +122,11 @@ public class WholeProjectTests {
     void testInsertionSort(){
         runAndVerify("InsertionSort");
     }
+    @Test
+    void testQuoteAndEval(){
+        runAndVerify("QuoteAndEval");
+    }
+
 
     // @TestFactory
     // Collection<DynamicTest> All(){

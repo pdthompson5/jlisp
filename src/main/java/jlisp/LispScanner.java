@@ -69,6 +69,7 @@ public class LispScanner {
 
 
   ArrayList<String> splitBySpace(){
+    //Most of this code function is borrowed from: http://norvig.com/lispy.html
     String sourceWithSpaces = source.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ");
     sourceWithSpaces = sourceWithSpaces.replaceAll("\n", " \n ");
     return new ArrayList<String>(Arrays.asList(sourceWithSpaces.split(" ")));
@@ -79,13 +80,6 @@ public class LispScanner {
       case "": break;
       case "(": addToken(LEFT_PAREN, tokenString, null); break;
       case ")": addToken(RIGHT_PAREN, tokenString, null); break;
-      // case "-": addToken(MINUS); break;   
-      // case "+": addToken(PLUS); break;   
-      // case "*": addToken(STAR); break;   
-      // case "/": addToken(SLASH); break;   
-      // case "=": addToken(EQUAL); break;   
-      // case ">": addToken(GREATER_THAN); break;   
-      // case "<": addToken(LESS_THAN); break;
       case "t": addToken(T, null, true); break;
       case "\n": line++; break;
       case "\t": break;

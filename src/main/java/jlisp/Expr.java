@@ -1,12 +1,9 @@
 package jlisp;
 
 
-//Possible list expressions: Variable expression, literal expression, conditional expression, definition, call
-//All expressions of surounded by () forthe most part?
-
-//Between each perens there is a list of tokens 
-//if the length of the list is zero, return null (maybe null expression?)
 import java.util.List;
+
+//The ideas for expressions types borrowed from: http://norvig.com/lispy.html
 
 abstract class Expr {
     interface Visitor<R> {
