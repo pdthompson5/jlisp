@@ -314,20 +314,18 @@ public class Interpreter implements Expr.Visitor<Object>{
     }
 
 
-    //This function creates a deep copy of a "Lispy" list. Our lists can only contain doubles, strings and lists 
-    private List<Object> deepCopyList(List<Object> list){
+    //This function creates a deep copy of a "Lispy" list. Our lists can only contain cons cells, doubles, strings and lists 
+    public static List<Object> deepCopyList(List<Object> list){
         List<Object> copy = new ArrayList<Object>();
         for(Object i : list){
-            //Strings and Doubles are immutable so we can just add them 
-            if(i instanceof Double){
-                copy.add(i);
-            }
-            if(i instanceof String){
-                copy.add(i);
-            }
+
             //deep copy sublists
             if(i instanceof List){
                 copy.add(deepCopyList((List<Object>)i));
+            }
+            else{
+                //Strings, Double and ConsCells are immutable so we can just add them 
+                copy.add(i);
             }
         }
         return copy;

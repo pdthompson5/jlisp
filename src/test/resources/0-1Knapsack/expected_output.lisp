@@ -1,0 +1,35 @@
+length
+nth
+nth2d
+max
+insert_recurse
+insert
+remove_recurse
+remove
+replace
+insert2d
+replace2d
+print2d
+zero_fill_2d
+knapsack
+knapsack_items
+values
+weights
+number_of_items
+capacity
+Include_Item:
+4
+Include_Item:
+1
+(1 0 0 1)
+values
+weights
+number_of_items
+capacity
+Include_Item:
+8
+Include_Item:
+4
+Include_Item:
+1
+(1 0 0 1 0 0 0 1 0 0)

@@ -126,6 +126,15 @@ public class WholeProjectTests {
     void testQuoteAndEval(){
         runAndVerify("QuoteAndEval");
     }
+    @Test
+    void testPassByValue(){
+        runAndVerify("PassByValue");
+    }
+    @Test
+    void test01Knapsack(){
+        runAndVerify("0-1Knapsack");
+    }
+    
 
 
     // @TestFactory

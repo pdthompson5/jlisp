@@ -1,6 +1,10 @@
 package jlisp;
 
-public class ConsCell {
+import java.util.List;
+
+
+
+public final class ConsCell{
     Object car;
     Object cdr;
 
@@ -12,4 +16,5 @@ public class ConsCell {
     public String toString(){
         return("(" + Interpreter.stringify(car) + " . " + Interpreter.stringify(cdr) + ")");
     }
+
 }
