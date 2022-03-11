@@ -1,5 +1,5 @@
 (define error (listA)
-    (car listA)
+    1
 )
 
 (define not_in_stack ()

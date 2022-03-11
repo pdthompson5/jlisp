@@ -30,8 +30,8 @@
 ;t
 ;()
 
-(if (> 1 2) (t) (()))
-(if (> 2 1) (t) (()))
+;; (if (> 1 2) (t) (()))
+;; (if (> 2 1) (t) (()))
 ;If statments
 ;()
 ;t
@@ -130,7 +130,7 @@ t
 
 ;functions define and call
 (define foo () (print 1))
-(define bar (a b c) (- a (b + c)))
+(define bar (a b c) (- a (+ b c)))
 
 (foo)
 (bar 1 2 3)
