@@ -5,6 +5,13 @@ import static jlisp.TokenType.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Parser for this project. 
+ * Input: list of tokens
+ * Output: list of expressions
+ * Based on the Parser class from CraftingInterpreters
+ */
+
 public class Parser {
 
     private final List<Token> tokens;
@@ -18,11 +25,10 @@ public class Parser {
 
     List<Expr> parse() {
         List<Expr> expressions = new ArrayList<>();
-        while(!isAtEnd()){
-            try{
+        while (!isAtEnd()) {
+            try {
                 expressions.add(expression());
-            }
-            catch(OutOfMemoryError e){
+            } catch (OutOfMemoryError e) {
                 //This handles the case of accidentally using c-style function calls i.e.: (foo (1 2 3))
                 System.out.println(peek().lexeme);
                 System.out.println(current);
@@ -34,8 +40,9 @@ public class Parser {
         return expressions;
     }
 
-    private Expr expression(){
-        if(peek().type == LEFT_PAREN){
+    private Expr expression() {
+        //Expressions at the highest level can be sExpressions or variables (or literals)
+        if (peek().type == LEFT_PAREN) {
             return sExpression();
         }
         return variable();
@@ -44,19 +51,18 @@ public class Parser {
 
 
 
-    private Expr sExpression(){
-        if(match(LEFT_PAREN)){
+    private Expr sExpression() {
+        if (match(LEFT_PAREN)) {
+            //Try to match 
             Expr cond = functionDefinition();
 
             //If no other matches it must be an S expression or not an expression
-            if(cond == null && peek().type == LEFT_PAREN && noMatch){
+            if (cond == null && peek().type == LEFT_PAREN && noMatch) {
                 cond = sExpression();
-            }
-            else if(noMatch){
+            } else if (noMatch) {
                 Jlisp.error("Expect expression", peek().line);
             }
-            
-
+        
             consume(RIGHT_PAREN, "Expect ')'");
             return cond;
         }
@@ -64,15 +70,15 @@ public class Parser {
         return functionDefinition();
     }
 
-    //Where can people define variables and such? anywhere? I think so
-    private Expr functionDefinition(){
+    private Expr functionDefinition() {
         
-        if(match(DEFINE)){
+        if (match(DEFINE)) {
             Token name = advance();
+
             //Read in parameter list 
             consume(LEFT_PAREN, "Expect '(' after function name");
             List<Token> parameters = new ArrayList<>(); 
-            while(peek().type != RIGHT_PAREN){
+            while (peek().type != RIGHT_PAREN) {
                 parameters.add(advance());
             }
             consume(RIGHT_PAREN, "Expect ')' after parameter list");
@@ -84,8 +90,8 @@ public class Parser {
         return variableDefinition();
     }
 
-    private Expr variableDefinition(){
-        if(match(SET)){
+    private Expr variableDefinition() {
+        if (match(SET)) {
             Token name = advance();
             Expr value = expression();
             return new Expr.VariableDefinition(name, value);
@@ -94,8 +100,8 @@ public class Parser {
         return condition();
     }
 
-    private Expr condition(){
-        if(match(IF)){
+    private Expr condition() {
+        if (match(IF)) {
             Expr condition = expression();
             Expr ifTrue = expression();
             Expr ifFalse = expression();
@@ -105,8 +111,8 @@ public class Parser {
         return whileLoop();
     }
     
-    private Expr whileLoop(){
-        if(match(WHILE)){
+    private Expr whileLoop() {
+        if (match(WHILE)) {
             Expr condition = expression();
             Expr body = expression();
             return new Expr.While(previous(), condition, body);
@@ -114,62 +120,62 @@ public class Parser {
         return quote();
     }
 
-    private Expr quote(){
-        if(match(QUOTE)){
+    private Expr quote() {
+        if (match(QUOTE)) {
             Token keyword = previous();
             List<Token> list = new ArrayList<>();
+
             //Add sequence of tokens
-            if(peek().type == LEFT_PAREN){
+            if (peek().type == LEFT_PAREN) {
                 list.add(advance());
                 
                 int rightParensNeeded = 1;
-                while(rightParensNeeded > 0){
-                    if(peek().type == RIGHT_PAREN){
+                //Add tokens until closing paren is found
+                while (rightParensNeeded > 0) {
+                    if (peek().type == RIGHT_PAREN) {
                         rightParensNeeded--;
                     }
-                    if(peek().type == LEFT_PAREN){
+                    if (peek().type == LEFT_PAREN) {
                         rightParensNeeded++;
                     }
                     list.add(advance());
                 }
-            }
-            else{
+            } else {
                 //Add single token
                 list.add(advance());
             }
            
-            
             return new Expr.Quote(keyword, list);
         }
         return procedure();
     }
 
-
-    private Expr procedure(){
+    //A procedure is a function call
+    private Expr procedure() {
         //Procedures can only occur at the beginning of an s expression
         //Ignore number in the case of a quote list: (quote (1 2 3))
-        if(previous().type == LEFT_PAREN && peek().type != NUMBER){
-            if(peek().type == RIGHT_PAREN){
+        if (previous().type == LEFT_PAREN && peek().type != NUMBER) {
+            //Match ()
+            if (peek().type == RIGHT_PAREN) {
                 return new Expr.Literal(null);
             }
 
             Token name = advance();
 
             List<Expr> arguments = new ArrayList<>();
-            while(peek().type != RIGHT_PAREN){
+            while (peek().type != RIGHT_PAREN) {
                 arguments.add(expression());
             }
             return new Expr.Procedure(name, arguments);
-
         }
         return variable();
     }
 
     
     
-    private Expr variable(){
-        //Variables will always be identifiers
-        if(match(IDENTIFIER)){
+    private Expr variable() {
+        //Functions have already been matched so all identifiers are variables
+        if (match(IDENTIFIER)) {
             Token name = previous();
             return new Expr.Variable(name);
         }
@@ -177,8 +183,8 @@ public class Parser {
     }
 
     //Only supported literals are number and t
-    private Expr literal(){
-        if(match(NUMBER, T)){
+    private Expr literal() {
+        if (match(NUMBER, T)) {
             Token lit = previous();
             return new Expr.Literal(lit.literal);
         }
@@ -187,10 +193,10 @@ public class Parser {
     }   
 
 
-    //Helper functions: Mostly directly borrowed from crafting interpreters 
+    //Helper functions: Mostly directly borrowed from CraftingInterpreters 
     private boolean match(TokenType... types) {
         for (TokenType type : types) {
-          if (check(type)) {
+            if (check(type)) {
                 advance();
                 return true;
             }
@@ -200,29 +206,27 @@ public class Parser {
     }
 
     
-  //Attempts to match a type, if not ERROR
+    //Attempts to match a type, if not ERROR
     private Token consume(TokenType type, String message) {
         if (check(type)) {
             return advance();
-        }
-        else {
+        } else {
             error(peek(), message);
             return null; //Unreachable
         }
-
-        
     }
     
 
     private boolean check(TokenType type) {
         if (isAtEnd()) return false;
-            return peek().type == type;
-        }
+        return peek().type == type;
+    }
+        
 
     private Token advance() {
         if (!isAtEnd()) current++;
-            return previous();
-        }
+        return previous();
+    }
 
     private Token previous() {
         return tokens.get(current - 1);
@@ -236,7 +240,7 @@ public class Parser {
         return peek().type == EOF;
     }
 
-    private void error(Token token, String message){
+    private void error(Token token, String message) {
         Jlisp.error(message, token.line);
     }
     

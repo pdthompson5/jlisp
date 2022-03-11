@@ -3,8 +3,12 @@ package jlisp;
 
 import java.util.List;
 
-//The ideas for expressions types borrowed from: http://norvig.com/lispy.html
-
+/**
+ * Lisp expressions. 
+ * Class structure is based on the Expr class from CraftingInterpreters
+ * The expressions types are mostly borrowed from: http://norvig.com/lispy.html
+ * Utilizes the visitor design pattern for expression evaluation
+ */
 abstract class Expr {
     interface Visitor<R> {
         R visitVariableExpr(Variable expr);
@@ -18,25 +22,29 @@ abstract class Expr {
       }
     abstract <R> R accept(Visitor<R> visitor);
    
-    static class Variable extends Expr{
+    static class Variable extends Expr {
         final Token name;
-        Variable(Token name){
+
+        Variable(Token name) {
             this.name = name;
         }
+
         @Override
         <R> R accept(Visitor<R> visitor) {
-          return visitor.visitVariableExpr(this);
+            return visitor.visitVariableExpr(this);
         }
     }
 
-    static class Literal extends Expr{
+    static class Literal extends Expr {
         final Object value; 
-        Literal(Object value){
+
+        Literal(Object value) {
             this.value = value;
         }
+
         @Override
         <R> R accept(Visitor<R> visitor) {
-          return visitor.visitLiteralExpr(this);
+            return visitor.visitLiteralExpr(this);
         }
     }
 
@@ -45,7 +53,8 @@ abstract class Expr {
         final Expr condition;
         final Expr ifTrue;
         final Expr ifFalse;
-        Conditional(Token keyword, Expr condition, Expr ifTrue, Expr ifFalse){
+
+        Conditional(Token keyword, Expr condition, Expr ifTrue, Expr ifFalse) {
             this.keyword = keyword;
             this.condition = condition;
             this.ifTrue = ifTrue;
@@ -54,52 +63,55 @@ abstract class Expr {
 
         @Override
         <R> R accept(Visitor<R> visitor) {
-          return visitor.visitConditionalExpr(this);
+            return visitor.visitConditionalExpr(this);
         }
     }
 
-    static class FunctionDefinition extends Expr{
-      final Token name;
-      final List<Token> parameters;
-      final Expr body;
-      FunctionDefinition(Token name, List<Token> parameters, Expr body){   
-          this.name = name;
-          this.parameters = parameters;
-          this.body = body;
-      }
+    static class FunctionDefinition extends Expr {
+        final Token name;
+        final List<Token> parameters;
+        final Expr body;
 
-      @Override
-      <R> R accept(Visitor<R> visitor) {
-        return visitor.visitFunctionDefinitionExpr(this);
-      }
+        FunctionDefinition(Token name, List<Token> parameters, Expr body) {   
+            this.name = name;
+            this.parameters = parameters;
+            this.body = body;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitFunctionDefinitionExpr(this);
+        }
     }
     
 
-    static class VariableDefinition extends Expr{
+    static class VariableDefinition extends Expr {
         final Token name;
         final Expr value;
-        VariableDefinition(Token name, Expr value){   
+        
+        VariableDefinition(Token name, Expr value) {   
             this.name = name;
             this.value = value;
         }
 
         @Override
         <R> R accept(Visitor<R> visitor) {
-          return visitor.visitVariableDefinitionExpr(this);
+            return visitor.visitVariableDefinitionExpr(this);
         }
     }
 
-    static class Procedure extends Expr{
+    static class Procedure extends Expr {
         final Token name;
         final List<Expr> arguments;
-        Procedure(Token name, List<Expr> arguments){
+
+        Procedure(Token name, List<Expr> arguments) {
             this.name = name;
             this.arguments = arguments;
         }
 
         @Override
         <R> R accept(Visitor<R> visitor) {
-          return visitor.visitProcedureExpr(this);
+            return visitor.visitProcedureExpr(this);
         }
     }
 
@@ -107,27 +119,31 @@ abstract class Expr {
         Token keyword;
         Expr condition;
         Expr body;
-        While(Token keyword, Expr condition, Expr body){
+        
+        While(Token keyword, Expr condition, Expr body) {
             this.keyword = keyword;
             this.condition = condition;
             this.body = body;
         }
+
         @Override
         <R> R accept(Visitor<R> visitor) {
-          return visitor.visitWhileExpr(this);
+            return visitor.visitWhileExpr(this);
         }
     }
-    static class Quote extends Expr{
-      Token keyword;
-      List<Token> inner;
-      Quote(Token keyword, List<Token> inner){
-          this.keyword = keyword;
-          this.inner = inner;
-      }
-      @Override
-      <R> R accept(Visitor<R> visitor) {
-        return visitor.visitQuoteExpr(this);
-      }
-  }
-    
+
+    static class Quote extends Expr {
+        Token keyword;
+        List<Token> inner;
+
+        Quote(Token keyword, List<Token> inner) {
+            this.keyword = keyword;
+            this.inner = inner;
+        }
+      
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitQuoteExpr(this);
+        }
+    }
 }
