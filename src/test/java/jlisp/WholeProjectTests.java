@@ -134,6 +134,13 @@ public class WholeProjectTests {
     void test01Knapsack(){
         runAndVerify("0-1Knapsack");
     }
+    //This test is commented out since the code will result in a system exit. Regardless a sample run can be found in the resources folder.
+    // @Test
+    // void testCallStack(){
+    //     runAndVerify("CallStack");
+    // }
+
+
     
 
 

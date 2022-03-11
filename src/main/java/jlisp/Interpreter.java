@@ -2,7 +2,7 @@ package jlisp;
 
 
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Stack;
 
 import static jlisp.TokenType.*;
 
@@ -11,6 +11,8 @@ import java.util.ArrayList;
 //While loops, conditionals and functions do not eval all of their sub expressions
 public class Interpreter implements Expr.Visitor<Object>{
     Environment globals = new Environment();
+    Stack<String> callStack = new Stack<String>();
+
 
     Object evaluate(Expr expr) {
         // AstPrinter printer = new AstPrinter();
@@ -19,7 +21,14 @@ public class Interpreter implements Expr.Visitor<Object>{
             return expr.accept(this);
         }
         catch(RuntimeError error){
-            Jlisp.error(error.getMessage(), error.token.line);
+            String message = error.getMessage();
+            if(!callStack.isEmpty()){
+                message += "\n";
+            }
+            while(!callStack.isEmpty()){
+                message += callStack.pop() + "\n";
+            }
+            Jlisp.error(message, error.token.line);
         }
         return null; //unreachable
     }
@@ -27,13 +36,16 @@ public class Interpreter implements Expr.Visitor<Object>{
     @Override
     public Object visitConditionalExpr(Expr.Conditional expr) {
         Object condition = evaluate(expr.condition);
+        Object output;
 
         if(isTruthy(condition, expr.keyword)){
-            return evaluate(expr.ifTrue);
+            output = evaluate(expr.ifTrue);
         }
         else{
-            return evaluate(expr.ifFalse);
+            output = evaluate(expr.ifFalse);
         }
+
+        return output;
     }
     
     @Override
@@ -50,6 +62,8 @@ public class Interpreter implements Expr.Visitor<Object>{
     
     @Override
     public Object visitProcedureExpr(Expr.Procedure expr) {
+        callStack.push("   at " + expr.name.lexeme + " (Line: " + expr.name.line + ")");
+
         //Evaluate arguments 
         List<Object> values = new ArrayList<>();
         for(Expr argument : expr.arguments){
@@ -73,7 +87,9 @@ public class Interpreter implements Expr.Visitor<Object>{
 
         //Return the result of the function
         try{
-            return func.call(this, values, expr.name.line);
+            Object value = func.call(this, values, expr.name.line);
+            callStack.pop();
+            return value;
         } catch (ClassCastException error){
             String args = "Arguments recieved: ";
             for(Object val : values){
