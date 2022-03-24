@@ -81,7 +81,7 @@ public class LispScanner {
             case "": break;
             case "(": addToken(LEFT_PAREN, tokenString, null); break;
             case ")": addToken(RIGHT_PAREN, tokenString, null); break;
-            case "t": addToken(T, null, true); break;
+            case "t": addToken(T, tokenString, true); break;
             case "\n": line++; break;
             case "\t": break;
             case "\r": break;

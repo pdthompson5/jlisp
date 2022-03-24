@@ -357,7 +357,7 @@ public class Environment {
     }
 
     void printEnv() {
-        System.out.println(varEnv.toString());
+        System.out.println("Var env: " + varEnv.toString());
     }
 
     Object getVar(Token name) {

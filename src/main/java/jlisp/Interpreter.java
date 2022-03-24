@@ -116,6 +116,8 @@ public class Interpreter implements Expr.Visitor<Object> {
             value = deepCopyList((List<Object>) value);
         }
 
+        //In order to enable what I want I would need to change the variable name to an expression that can eval to a string
+
         Object val = evaluate(expr.value);
      
         boolean updateSucess = globals.updateVar(expr.name, val);
@@ -200,6 +202,7 @@ public class Interpreter implements Expr.Visitor<Object> {
         if (tokens.get(0).type == NUMBER)  return tokens.get(0).literal; 
         //evaluate t
         if (tokens.get(0).type == T) return true;
+
 
         //Save the expression as an unevaluated String
         String s = "";
