@@ -24,3 +24,6 @@ hs_err_pid*
 
 # Maven 
 target
+
+# Personal lisp files
+lisp_dev

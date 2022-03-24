@@ -335,11 +335,24 @@ public class Environment {
         funcEnv = new HashMap<>();
     }
 
-    void defineVar(String name, Object value){
+    void defineVar(String name, Object value) {
         varEnv.put(name, value);
     }
 
-    void defineFunc(String name, LispCallable func){
+    boolean updateVar(Token name, Object val) {
+        if (varEnv.containsKey(name.lexeme)) {
+            varEnv.replace(name.lexeme, val);
+            return true;
+        }
+
+        //Look in enclosing env
+        boolean updateSuccess = false;
+        if (enclosing != null) updateSuccess = enclosing.updateVar(name, val);
+
+        return updateSuccess;
+    }
+
+    void defineFunc(String name, LispCallable func) {
         funcEnv.put(name, func);
     }
 
@@ -356,9 +369,12 @@ public class Environment {
         //Look in enclosing env
         if (enclosing != null) return enclosing.getVar(name);
 
+        
         Jlisp.error("Undefined variable '" + name.lexeme + "'", name.line);
         return null; //unreachable
     }
+
+
 
     LispCallable getFunc(Token name){
         //Look-up in current env 

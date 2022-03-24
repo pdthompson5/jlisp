@@ -115,7 +115,17 @@ public class Interpreter implements Expr.Visitor<Object> {
         if (value instanceof List) {
             value = deepCopyList((List<Object>) value);
         }
-        globals.defineVar(expr.name.lexeme, evaluate(expr.value));
+
+        Object val = evaluate(expr.value);
+     
+        boolean updateSucess = globals.updateVar(expr.name, val);
+      
+        //create new variable 
+        if (!updateSucess) {
+            globals.defineVar(expr.name.lexeme, val);
+        }
+        
+        
         return expr.name.lexeme;
     }
 

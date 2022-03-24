@@ -15,7 +15,6 @@ import java.util.Scanner;
  */
 
 public class Jlisp {
-    private static final Interpreter interpreter = new Interpreter();
 
     //When debug is true, results of top level expressions will be printed. 
     //REPL default: debug==true
@@ -23,7 +22,7 @@ public class Jlisp {
     private static boolean debug = false;
 
     public static void main(String[] args) throws IOException {
-        if (args.length > 2){
+        if (args.length > 2) {
             System.out.println("Usage: make jlisp [script]");
             System.exit(64);
         } else if (args.length >= 1) {
@@ -39,7 +38,8 @@ public class Jlisp {
 
     private static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
-        run(new String(bytes, Charset.defaultCharset()));
+        Interpreter interpreter = new Interpreter();
+        run(new String(bytes, Charset.defaultCharset()), interpreter);
     }
 
     public static void error(String message, int line) {
@@ -51,13 +51,14 @@ public class Jlisp {
     //Borrowed from CraftingInterpreters
     private static void runREPL() {
         Scanner reader = new Scanner(System.in);
+        Interpreter interpreter = new Interpreter();
         debug = true;
 
         while (true) {
             System.out.print(">>> ");
             String line = reader.nextLine();
             if(line==null) break;
-            run(line);
+            run(line, interpreter);
         }
 
         reader.close();
@@ -66,7 +67,7 @@ public class Jlisp {
     
 
     //Scans the string, parses the tokens, evaluates the expressions
-    private static void run(String source) {
+    private static void run(String source, Interpreter interpreter) {
         LispScanner scanner = new LispScanner(source);
         List<Token> tokens = scanner.scanTokens();
 
